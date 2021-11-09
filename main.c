@@ -1,21 +1,17 @@
 #include "stm32f10x.h"
 #include "delay.h"
+#include "config.h"
 
-void gpio_ports_enable(void)
+int state = 0; // 0 -> Red, 1 -> Yellow, 2 -> Green
+
+void Setup(void)
 {
-GPIO_InitTypeDef GPIO_InitStructure;
-RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13; //Red
-GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12; //Yellow
-GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11; //Green
-GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-GPIO_Init(GPIOC, &GPIO_InitStructure);
+Config_GPIO();
+Config_EXTI();
 }
 int main(void)
 {
-gpio_ports_enable();
-int state = 0; // 0 -> Red, 1 -> Yellow, 2 -> Green
+Setup();
 int prev = 0; // 0 -> Red, 2 -> Green
 	while(1)
 	{
