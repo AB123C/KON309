@@ -5,7 +5,6 @@ void gpio_ports_enable(void)
 {
 GPIO_InitTypeDef GPIO_InitStructure;
 RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-// Configure PC13 as desired
 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13; //Red
 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12; //Yellow
 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11; //Green
@@ -17,7 +16,7 @@ int main(void)
 {
 gpio_ports_enable();
 int state = 0; // 0 -> Red, 1 -> Yellow, 2 -> Green
-int prev = 0;
+int prev = 0; // 0 -> Red, 2 -> Green
 	while(1)
 	{
 		switch(state)
