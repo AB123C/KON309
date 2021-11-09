@@ -20,7 +20,7 @@ int prev = 0; // 0 -> Red, 2 -> Green
 			case(0):
 			{
 				GPIO_SetBits(GPIOC, GPIO_Pin_13);
-				delay(5000);
+				delayMs(5000);
 				GPIO_ResetBits(GPIOC, GPIO_Pin_13);
 				prev = 0;
 				state = 1;
@@ -28,7 +28,7 @@ int prev = 0; // 0 -> Red, 2 -> Green
 			case(1):
 			{
 				GPIO_SetBits(GPIOC, GPIO_Pin_12);
-				delay(2000);
+				delayMs(2000);
 				GPIO_ResetBits(GPIOC, GPIO_Pin_12);
 				if(prev)
 				state = 0;
@@ -38,7 +38,7 @@ int prev = 0; // 0 -> Red, 2 -> Green
 			case(2):
 			{
 				GPIO_SetBits(GPIOC, GPIO_Pin_11);
-				delay(5000);
+				delayMs(5000);
 				GPIO_ResetBits(GPIOC, GPIO_Pin_11);
 				prev = 2;
 				state = 1;
