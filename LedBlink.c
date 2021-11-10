@@ -3,9 +3,7 @@
 GPIO_InitTypeDef GPIO_InitStructure;
 int main(void)
 {
-	int started = 0, state = 0;
-	int b1_pressed = 0,
-	
+    int interrupt = 0;
 	// Enable clock for PortC and PortA
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
@@ -22,7 +20,7 @@ int main(void)
     Config_NVIC();
 	delayInit();
 
-	while(1)
+	while(!interrupt)
 	{
         GPIO_SetBits(GPIOC, GPIO_Pin_13);
 		delayMs(5000);

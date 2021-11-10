@@ -158,7 +158,15 @@ void SysTick_Handler(void)
 
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
+extern int interrupt;
+void EXTI0_IRQHandler(void)
+{
+	if((EXTI_GetITStatus(EXTI_Line0) != RESET) && interrupt == 0)
+	{
+		interrupt = 1;
+	}
+	EXTI_ClearITPendingBit(EXTI_Line0);
+/*
 extern int state, prev;
 
 void EXTI0_IRQHandler(void)
@@ -169,4 +177,4 @@ void EXTI0_IRQHandler(void)
 		prev = 2;
 	}
 	EXTI_ClearITPendingBit(EXTI_Line0);
-}
+}*/
