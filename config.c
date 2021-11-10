@@ -9,19 +9,19 @@ void Config_GPIO()
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE); //Enable GPIO and AFIO clocks
 	
 	//Green
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10; 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 	
 	//Yellow
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11; 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 	//Red
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12; 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);

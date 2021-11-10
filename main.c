@@ -8,6 +8,8 @@ void Setup(void)
 {
 Config_GPIO();
 Config_EXTI();
+Config_NVIC();
+delayInit();
 }
 int main(void)
 {
