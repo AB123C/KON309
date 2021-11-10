@@ -166,6 +166,7 @@ void EXTI0_IRQHandler(void)
 		interrupt = 1;
 	}
 	EXTI_ClearITPendingBit(EXTI_Line0);
+}
 /*
 extern int state, prev;
 
