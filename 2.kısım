@@ -1,0 +1,170 @@
+#include "stm32f10x.h"
+#include "delay.h"
+
+	
+	int state = 0;
+ 	int seconds = 0;
+ 	int 5s= 5;
+ 	int 2s= 2;
+ 	
+	GPIO_InitTypeDef GPIO_InitStructure; 
+	EXTI_InitTypeDef EXTI_InitStructure; 
+	NVIC_InitTypeDef NVIC_InitStructure;
+	TIM_TimeBaseInitTypeDef TIM_BaseStructure;
+	
+	void TIM2_IRQHandler(void)
+	{
+ 		seconds++;
+ 		TIM2->SR &= ~TIM_SR_UIF;
+		
+	}
+
+	void 5sdelay(int 5s)
+	{
+		TIM_2->CR1  |= TIM_CR1_CEN;
+		seconds = 0;
+		while(seconds<5s)
+		TIM_2->CR1  &= ~TIM_CR1_CEN;
+	}
+	void 2sdelay(int 2s)
+	{
+		TIM_2->CR1  |= TIM_CR1_CEN;
+		seconds = 0;
+		while(seconds<2s)
+		TIM_2->CR1  &= ~TIM_CR1_CEN;
+	}
+		void EXTI0_IRQHandler(void)
+	{
+		if(EXTI_GetITStatus(EXTI_Line0) != RESET)
+		{	
+			2sdelay
+			if (state == 2)
+			{
+				state = 3;
+			}
+			
+		}
+	 
+	}
+int main(void)
+{
+	
+	
+	// Enable clocks PortA (for button) and AFIO (for exti)
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+	// Enable clock for Timer 2
+ 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	// Configure EXTI line (PA0)
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);
+	// Configure external interrupt
+	EXTI_DeInit();
+	EXTI_InitStructure.EXTI_Line = EXTI_Line0;
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitStructure);
+	// Configure time base generation
+	TIM_TimeBaseStructure.TIM_Period = 4999;
+	TIM_TimeBaseStructure.TIM_Prescaler = 71;
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_2->CR1  |= TIM_CR1_URS;
+	TIM2->DIER |= TIM_DIER_UIE;
+	TIM2->EGR |= TIM_EGR_UG;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+	// Enable interrupts
+	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+	// Enable timer 2
+	TIM_Cmd(TIM2, ENABLE);	
+	// Configure nested vector interrupt controller (for timer2)
+	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	// Configure nested vector interrupt controller (for external interrupt)
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	// Configure button as pull down connected to PA0
+ 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+ 	// Configure external LED connected to PA5 (L1Red)
+ 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+ 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+ 	 // Configure external LED connected to PA6 (L1Yellow)
+ 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
+ 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+ 	 // Configure external LED connected to PA7 (L1Green)
+ 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+ 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+ 	// Configure external LED connected to PA8 (L2Red)
+ 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+ 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+ 	// Configure external LED connected to PA9 (L2Green)
+ 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+ 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+ 	
+ 	TIM2_IRQHandler();
+ 	EXTI0_IRQHandler();
+	delayInit();
+
+	while(1)
+		{
+			switch(state)
+			{
+				
+				case(1):
+				
+					GPIO_SetBits(GPIOC, GPIO_Pin_6);
+					GPIO_SetBits(GPIOC, GPIO_Pin_8);
+					2sdelay;
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_8);
+					state = 2;
+					break;
+			
+				case(2):
+				
+					GPIO_SetBits(GPIOC, GPIO_Pin_7);
+					GPIO_SetBits(GPIOC, GPIO_Pin_8);
+					5sdelay;
+					GPIO_ResetBits(GPIOC, GPIO_Pin_7);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_8);
+					state = 3;
+					break;
+				
+				case(3):
+					GPIO_SetBits(GPIOC, GPIO_Pin_6);
+					GPIO_SetBits(GPIOC, GPIO_Pin_8);
+					2sdelay;
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_8);
+					state = 0;
+					break;
+				
+				default:
+					
+					GPIO_SetBits(GPIOC, GPIO_Pin_5);
+					GPIO_SetBits(GPIOC, GPIO_Pin_9);
+					5sdelay;
+					GPIO_ResetBits(GPIOC, GPIO_Pin_5);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_9);
+					state = 1;
+					break;
+			}
+		} 	
+}
