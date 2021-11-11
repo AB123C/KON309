@@ -1,0 +1,43 @@
+#include "stm32f10x.h"
+#include "config.h"
+//#include "delay.h"
+
+int stateT = 0;
+int stateP = 1;
+
+void setup(void)
+{
+	Config_GPIO();
+	Config_EXTI();
+	Config_TIM2();
+	Config_NVIC();
+	//delayInit();
+}
+int main(void)
+{
+    setup();
+    while(1)
+    {
+		switch (stateT)
+		{
+			case 0: //Red
+
+				break;
+			case 1: //Yellow
+			
+				break;
+			case 2: //Green
+			
+				break;
+		}
+		switch (stateP)
+		{
+			case 0: //Red
+			
+				break;
+			case 1: Yellow
+			
+				break;
+		}
+	} 			
+}
