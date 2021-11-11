@@ -35,7 +35,7 @@ int main(void)
 			case 0: //Red
 			
 				break;
-			case 1: Yellow
+			case 1: //Green
 			
 				break;
 		}
