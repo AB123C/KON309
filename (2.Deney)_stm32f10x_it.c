@@ -168,16 +168,16 @@ void EXTI0_IRQHandler()
 	EXTI_ClearITPendingBit(EXTI_Line0);
 }
 
-void TIM2_IRQHandler()
+void TIM2_IRQHandler() //Eğer hocanın verdiği değerler 1 saniyeye denk geliyorsa her saniye bu fonksiyonun çalışması lazım
 {
   if(TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
   {
     
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
   }
-  if(TIM_GetITStatus(TIM2, TIM_IT_CC1) == SET)
+  /*if(TIM_GetITStatus(TIM2, TIM_IT_CC1) == SET)
   {
     
     TIM_ClearITPendingBit(TIM2, TIM_IT_CC1);
-  }
+  }*/
 }
