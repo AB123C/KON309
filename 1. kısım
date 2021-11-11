@@ -8,7 +8,7 @@
 	EXTI_InitTypeDef EXTI_InitStructure; 
 	NVIC_InitTypeDef NVIC_InitStructure;
 	
- 	EXTI0_IRQHandler();
+ 	
 
 	void EXTI0_IRQHandler(void)
 	{
