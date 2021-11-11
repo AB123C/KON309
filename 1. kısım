@@ -1,0 +1,102 @@
+#include "stm32f10x.h"
+#include "delay.h"
+
+	
+	GPIO_InitTypeDef GPIO_InitStructure; 
+	EXTI_InitTypeDef EXTI_InitStructure; 
+	NVIC_InitTypeDef NVIC_InitStructure; 	
+	int state = 0;
+	// Enable clocks PortA (for button) and AFIO (for exti)
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+	// Configure EXTI line (PA0)
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);
+	// Configure external interrupt
+	EXTI_DeInit();
+	EXTI_InitStructure.EXTI_Line = EXTI_Line0;
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitStructure);
+	// Configure nested vector interrupt controller
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	// Configure button as pull down connected to PA0
+ 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+ 	// Configure external LED connected to PA5 (Red)
+ 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+ 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+ 	 // Configure external LED connected to PA6 (Yellow)
+ 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
+ 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+ 	 // Configure external LED connected to PA7 (Green)
+ 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+ 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+ 	
+ 	EXTI0_IRQHandler();
+
+	void EXTI0_IRQHandler(void)
+	{
+		if(EXTI_GetITStatus(EXTI_Line0) != RESET)
+		{
+			if (state == 2)
+			{
+				state = 3;
+			}
+			
+		}
+	 
+	}
+
+int main(void)
+{
+	
+
+	while(1)
+		{
+			switch(state)
+			{
+				
+				case(1):
+				
+					GPIO_SetBits(GPIOC, GPIO_Pin_6);
+					delayMs(2000);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					state = 2;
+					break;
+			
+				case(2):
+				
+					GPIO_SetBits(GPIOC, GPIO_Pin_7);
+					delayMs(5000);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_7);
+					state = 3;
+					break;
+				
+				case(3):
+					GPIO_SetBits(GPIOC, GPIO_Pin_6);
+					delayMs(2000);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					state = 0;
+					break;
+				
+				default:
+					
+					GPIO_SetBits(GPIOC, GPIO_Pin_5);
+					delayMs(5000);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_5);
+					state = 1;
+					break;
+			}
+		} 	
+}
