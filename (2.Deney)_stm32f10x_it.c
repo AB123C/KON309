@@ -158,21 +158,22 @@ void SysTick_Handler(void)
 
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
+extern int stateT, stateP;
+int button = 0, counter5s = 0;
 void EXTI0_IRQHandler()
 {
 	if((EXTI_GetITStatus(EXTI_Line0) != RESET))
 	{
-
+		button = 1;
 	}
 	EXTI_ClearITPendingBit(EXTI_Line0);
 }
 
 void TIM2_IRQHandler() //Eğer hocanın verdiği değerler 1 saniyeye denk geliyorsa her saniye bu fonksiyonun çalışması lazım
 {
-  if(TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
+  if(TIM_GetITStatus(TIM2, TIM_IT_Update) == SET && button && stateT = 2 && counter5s < 3)
   {
-    
+    stateT = 1;
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
   }
   /*if(TIM_GetITStatus(TIM2, TIM_IT_CC1) == SET)
