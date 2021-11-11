@@ -2,7 +2,7 @@
 #include "delay.h"
 
 	
-	state = 0
+	int state = 0
  	
 	GPIO_InitTypeDef GPIO_InitStructure; 
 	EXTI_InitTypeDef EXTI_InitStructure; 
