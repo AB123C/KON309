@@ -57,6 +57,15 @@ void Config_EXTI()
 	EXTI_Init(&EXTI_InitStructure);
 }
 
+void Config_TIM2()
+{
+	TIM_TimeBaseStructure.TIM_Period = 49999;
+	TIM_TimeBaseStructure.TIM_Prescaler = 143;
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+}
+
 void Config_NVIC()
 {
 	// Configure nested vector interrupt controller
@@ -65,4 +74,11 @@ void Config_NVIC()
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
+	
+	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01; //Bu kısımdan emin değilim 0x00 birinci öncelikse 0x01 ikinci önceliktir diye düşündüm
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01; //Aynı şekilde
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	
 }
