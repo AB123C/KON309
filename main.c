@@ -21,29 +21,32 @@ int prev = 0; // 0 -> Red, 2 -> Green
 		{
 			case(0):
 			{
-				GPIO_SetBits(GPIOC, GPIO_Pin_13);
+				GPIO_SetBits(GPIOA, GPIO_Pin_6);
 				delayMs(5000);
-				GPIO_ResetBits(GPIOC, GPIO_Pin_13);
+				GPIO_ResetBits(GPIOA, GPIO_Pin_6);
 				prev = 0;
 				state = 1;
+				break ;
 			}
 			case(1):
 			{
-				GPIO_SetBits(GPIOC, GPIO_Pin_12);
+				GPIO_SetBits(GPIOA, GPIO_Pin_5);
 				delayMs(2000);
-				GPIO_ResetBits(GPIOC, GPIO_Pin_12);
+				GPIO_ResetBits(GPIOA, GPIO_Pin_5);
 				if(prev)
 				state = 0;
 				else
 				state = 2;
+				break ;
 			}
-			case(2):
+			case 2:
 			{
-				GPIO_SetBits(GPIOC, GPIO_Pin_11);
+				GPIO_SetBits(GPIOA, GPIO_Pin_4);
 				delayMs(5000);
-				GPIO_ResetBits(GPIOC, GPIO_Pin_11);
+				GPIO_ResetBits(GPIOA, GPIO_Pin_4);
 				prev = 2;
 				state = 1;
+				break ;
 			}
 		}
 	} 			
