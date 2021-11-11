@@ -59,8 +59,8 @@ void Config_EXTI()
 
 void Config_TIM2()
 {
-	TIM_TimeBaseStructure.TIM_Period = 49999;
-	TIM_TimeBaseStructure.TIM_Prescaler = 143;
+	TIM_TimeBaseStructure.TIM_Period = 49999; //Hocanın verdiği bu değerler sanırım 1 saniyeye denk gelecek şekilde,
+	TIM_TimeBaseStructure.TIM_Prescaler = 143;  //eğer değilse formülü kullanıp elle hesaplamamız lazım
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
