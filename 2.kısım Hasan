@@ -65,7 +65,7 @@ int main(void)
 	EXTI_Init(&EXTI_InitStructure);
 	// Configure time base generation
 	TIM_TimeBaseStructure.TIM_Period = 4999;
-	TIM_TimeBaseStructure.TIM_Prescaler = 71;
+	TIM_TimeBaseStructure.TIM_Prescaler = 143;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_2->CR1  |= TIM_CR1_URS;
 	TIM2->DIER |= TIM_DIER_UIE;
