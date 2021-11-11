@@ -2,10 +2,29 @@
 #include "delay.h"
 
 	
+	state = 0
+ 	
+ 	EXTI0_IRQHandler();
+
+	void EXTI0_IRQHandler(void)
+	{
+		if(EXTI_GetITStatus(EXTI_Line0) != RESET)
+		{
+			if (state == 2)
+			{
+				state = 3;
+			}
+			
+		}
+	 
+	}
+
+int main(void)
+{
 	GPIO_InitTypeDef GPIO_InitStructure; 
 	EXTI_InitTypeDef EXTI_InitStructure; 
 	NVIC_InitTypeDef NVIC_InitStructure; 	
-	int state = 0;
+	
 	// Enable clocks PortA (for button) and AFIO (for exti)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	// Configure EXTI line (PA0)
@@ -42,25 +61,9 @@
  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
  	GPIO_Init(GPIOA, &GPIO_InitStructure);
- 	
- 	EXTI0_IRQHandler();
-
-	void EXTI0_IRQHandler(void)
-	{
-		if(EXTI_GetITStatus(EXTI_Line0) != RESET)
-		{
-			if (state == 2)
-			{
-				state = 3;
-			}
-			
-		}
-	 
-	}
-
-int main(void)
-{
 	
+	EXTI0_IRQHandler();
+	delayInit();
 
 	while(1)
 		{
