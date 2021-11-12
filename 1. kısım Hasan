@@ -74,32 +74,32 @@ int main(void)
 				
 				case(1):
 				
-					GPIO_SetBits(GPIOC, GPIO_Pin_6);
+					GPIO_SetBits(GPIOA, GPIO_Pin_6);
 					delayMs(2000);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_6);
 					state = 2;
 					break;
 			
 				case(2):
 				
-					GPIO_SetBits(GPIOC, GPIO_Pin_7);
+					GPIO_SetBits(GPIOA, GPIO_Pin_7);
 					delayMs(5000);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_7);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_7);
 					state = 3;
 					break;
 				
 				case(3):
-					GPIO_SetBits(GPIOC, GPIO_Pin_6);
+					GPIO_SetBits(GPIOA, GPIO_Pin_6);
 					delayMs(2000);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_6);
 					state = 0;
 					break;
 				
 				default:
 					
-					GPIO_SetBits(GPIOC, GPIO_Pin_5);
+					GPIO_SetBits(GPIOA, GPIO_Pin_5);
 					delayMs(5000);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_5);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_5);
 					state = 1;
 					break;
 			}
