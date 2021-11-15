@@ -3,44 +3,31 @@
 
 	
 	int state = 0;
- 	int seconds = 0;
- 	int 5s= 5;
- 	int 2s= 2;
+ 	int counter = 0;
  	
 	GPIO_InitTypeDef GPIO_InitStructure; 
 	EXTI_InitTypeDef EXTI_InitStructure; 
 	NVIC_InitTypeDef NVIC_InitStructure;
 	TIM_TimeBaseInitTypeDef TIM_BaseStructure;
 	
-	void TIM2_IRQHandler(void)
-	{
- 		seconds++;
- 		TIM2->SR &= ~TIM_SR_UIF;
-		
-	}
+void TIM2_IRQHandler()
+{
+	if(TIM_GetITStatus(TIM2, TIM_IT_Update | TIM_IT_CC1) == SET) // Check for timer interrupt status
+		{ 
+			counter = counter++;
+			TIM_ClearITPendingBit(TIM2, TIM_IT_Update | TIM_IT_CC1); // Clear the TIM interrupt pending bits
+		}
+}
 
-	void 5sdelay(int 5s)
-	{
-		TIM_2->CR1  |= TIM_CR1_CEN;
-		seconds = 0;
-		while(seconds<5s)
-		TIM_2->CR1  &= ~TIM_CR1_CEN;
-	}
-	void 2sdelay(int 2s)
-	{
-		TIM_2->CR1  |= TIM_CR1_CEN;
-		seconds = 0;
-		while(seconds<2s)
-		TIM_2->CR1  &= ~TIM_CR1_CEN;
-	}
+	
 		void EXTI0_IRQHandler(void)
 	{
 		if(EXTI_GetITStatus(EXTI_Line0) != RESET)
 		{	
-			2sdelay
-			if (state == 2)
+			
+			if (counter <= 100 && state == 2)
 			{
-				state = 3;
+				counter = 100;
 			}
 			
 		}
@@ -64,7 +51,7 @@ int main(void)
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&EXTI_InitStructure);
 	// Configure time base generation
-	TIM_TimeBaseStructure.TIM_Period = 4999;
+	TIM_TimeBaseStructure.TIM_Period = 49999;
 	TIM_TimeBaseStructure.TIM_Prescaler = 143;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_2->CR1  |= TIM_CR1_URS;
@@ -126,45 +113,57 @@ int main(void)
 		{
 			switch(state)
 			{
+				case(0):
+					GPIO_ResetBits(GPIOC, GPIO_Pin_5);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_7);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_8);
+					do
+					{
+						GPIO_SetBits(GPIOC, GPIO_Pin_5);
+						GPIO_SetBits(GPIOC, GPIO_Pin_9);
+					}
+					while(counter <= 49);
+					state = 1;
+					break;
 				
 				case(1):
-				
-					GPIO_SetBits(GPIOC, GPIO_Pin_6);
-					GPIO_SetBits(GPIOC, GPIO_Pin_8);
-					2sdelay;
-					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_8);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_5);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_9);
+					do
+					{
+						GPIO_SetBits(GPIOC, GPIO_Pin_6);
+						GPIO_SetBits(GPIOC, GPIO_Pin_8);
+					}
+					while(counter <= 69);
 					state = 2;
 					break;
 			
 				case(2):
-				
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					do
+					{
 					GPIO_SetBits(GPIOC, GPIO_Pin_7);
 					GPIO_SetBits(GPIOC, GPIO_Pin_8);
-					5sdelay;
-					GPIO_ResetBits(GPIOC, GPIO_Pin_7);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_8);
+					}
+				
+					while(counter <= 119);
 					state = 3;
 					break;
 				
 				case(3):
+					GPIO_ResetBits(GPIOC, GPIO_Pin_7);
+					do
+					{
 					GPIO_SetBits(GPIOC, GPIO_Pin_6);
 					GPIO_SetBits(GPIOC, GPIO_Pin_8);
-					2sdelay;
-					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_8);
+					}
+				
+					while(counter <= 139);
+					counter = 0;
 					state = 0;
 					break;
 				
-				default:
-					
-					GPIO_SetBits(GPIOC, GPIO_Pin_5);
-					GPIO_SetBits(GPIOC, GPIO_Pin_9);
-					5sdelay;
-					GPIO_ResetBits(GPIOC, GPIO_Pin_5);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_9);
-					state = 1;
-					break;
 			}
 		} 	
 }
