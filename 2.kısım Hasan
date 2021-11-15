@@ -114,37 +114,37 @@ int main(void)
 			switch(state)
 			{
 				case(0):
-					GPIO_ResetBits(GPIOC, GPIO_Pin_5);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_7);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_8);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_5);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_6);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_7);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_8);
 					do
 					{
-						GPIO_SetBits(GPIOC, GPIO_Pin_5);
-						GPIO_SetBits(GPIOC, GPIO_Pin_9);
+						GPIO_SetBits(GPIOA, GPIO_Pin_5);
+						GPIO_SetBits(GPIOA, GPIO_Pin_9);
 					}
 					while(counter <= 49);
 					state = 1;
 					break;
 				
 				case(1):
-					GPIO_ResetBits(GPIOC, GPIO_Pin_5);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_9);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_5);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_9);
 					do
 					{
-						GPIO_SetBits(GPIOC, GPIO_Pin_6);
-						GPIO_SetBits(GPIOC, GPIO_Pin_8);
+						GPIO_SetBits(GPIOA, GPIO_Pin_6);
+						GPIO_SetBits(GPIOA, GPIO_Pin_8);
 					}
 					while(counter <= 69);
 					state = 2;
 					break;
 			
 				case(2):
-					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_6);
 					do
 					{
-					GPIO_SetBits(GPIOC, GPIO_Pin_7);
-					GPIO_SetBits(GPIOC, GPIO_Pin_8);
+					GPIO_SetBits(GPIOA, GPIO_Pin_7);
+					GPIO_SetBits(GPIOA, GPIO_Pin_8);
 					}
 				
 					while(counter <= 119);
@@ -152,11 +152,11 @@ int main(void)
 					break;
 				
 				case(3):
-					GPIO_ResetBits(GPIOC, GPIO_Pin_7);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_7);
 					do
 					{
-					GPIO_SetBits(GPIOC, GPIO_Pin_6);
-					GPIO_SetBits(GPIOC, GPIO_Pin_8);
+					GPIO_SetBits(GPIOA, GPIO_Pin_6);
+					GPIO_SetBits(GPIOA, GPIO_Pin_8);
 					}
 				
 					while(counter <= 139);
