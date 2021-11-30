@@ -1,6 +1,7 @@
 #include "stm32f10x.h"
 
 GPIO_InitTypeDef GPIO_InitStructure;
+EXTI_InitTypeDef EXTI_InitStructure;
 
 TIM_TimeBaseStructure.TIM_Period = 49999;
 TIM_TimeBaseStructure.TIM_Prescaler = 143;
@@ -14,6 +15,35 @@ TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; // TIM2_CCER
 TIM_OCInitStructure.TIM_Pulse = 3600; // TIM2_CCR1
 TIM_OC2Init(TIM2, &TIM_OCInitStructure);
 
+EXTI_InitStructure.EXTI_Line = EXTI_Line0;
+EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+EXTI_Init(&EXTI_InitStructure);
+
+void EXTI4_IRQHandler(void)
+{
+	
+	EXTI_ClearITPendingBit(EXTI_Line4);
+}
+
+void EXTI6_IRQHandler(void)
+{
+	
+	EXTI_ClearITPendingBit(EXTI_Line5);
+}
+
+void EXTI5_IRQHandler(void)
+{
+	
+	EXTI_ClearITPendingBit(EXTI_Line6);
+}
+
+void TIM2_IRQHandler() 
+{
+	
+	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+}
 
 int main(void)
 {
@@ -22,28 +52,35 @@ int main(void)
 	//https://os.mbed.com/media/uploads/hudakz/stm32f103c8t6_pinout_voltage01.png
 
 	//Red
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1; 
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	AFIO_InitStructure.GPIO_Pin = GPIO_Pin_1; 
+	AFIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	AFIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	AFIO_Init(GPIOA, &GPIO_InitStructure);
 	//Yellow
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2; 
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	AFIO_InitStructure.GPIO_Pin = GPIO_Pin_2; 
+	AFIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	AFIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	AFIO_Init(GPIOA, &GPIO_InitStructure);
 	//Green
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3; 
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	//Buton1
+	AFIO_InitStructure.GPIO_Pin = GPIO_Pin_3; 
+	AFIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	AFIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	AFIO_Init(GPIOA, &GPIO_InitStructure);
+	//Button1
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	//Buton2
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource4);
+	//Button2
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource4);
+	//Button3
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource5);
 
 	TIM_Cmd(TIM2, ENABLE);
 
