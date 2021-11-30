@@ -1,5 +1,8 @@
 #include "stm32f10x.h"
 
+int led = 1; //Off = 0, Red = 1, Yellow = 2, Green = 3
+int brightness = 0; //Low = 0, Medium = 1, High = 2, Full = 3
+
 GPIO_InitTypeDef GPIO_InitStructure;
 EXTI_InitTypeDef EXTI_InitStructure;
 
@@ -21,21 +24,27 @@ EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
 EXTI_InitStructure.EXTI_LineCmd = ENABLE;
 EXTI_Init(&EXTI_InitStructure);
 
-void EXTI4_IRQHandler(void)
+void EXTI4_IRQHandler(void) //Switch Led
 {
-	
+	led++;
+	if(led == 4)
+	led  = 0;
 	EXTI_ClearITPendingBit(EXTI_Line4);
 }
 
 void EXTI6_IRQHandler(void)
 {
-	
+	brightness++;
+	if(brightness = 4)
+	brightness = 3;
 	EXTI_ClearITPendingBit(EXTI_Line5);
 }
 
 void EXTI5_IRQHandler(void)
 {
-	
+	brightness--;
+	if(brightness = -1)
+	brightness = 0;
 	EXTI_ClearITPendingBit(EXTI_Line6);
 }
 
@@ -85,7 +94,7 @@ int main(void)
 	TIM_Cmd(TIM2, ENABLE);
 
     while(1)
-    {
+	{
 		
 	} 			
 }
