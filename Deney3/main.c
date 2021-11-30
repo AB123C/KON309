@@ -53,17 +53,29 @@ void TIM2_IRQHandler()
 	switch(led)
 	{
 		case(1):
+			TIM_OCInitStructure.TIM_Pulse = 0;
+			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+			TIM_OCInitStructure.TIM_Pulse = 0;
+			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
 			TIM_OCInitStructure.TIM_Pulse = 3600/brightness;
 			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
-			end;
+			break;
 		case(2):
+			TIM_OCInitStructure.TIM_Pulse = 0;
+			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+			TIM_OCInitStructure.TIM_Pulse = 0;
+			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
 			TIM_OCInitStructure.TIM_Pulse = 3600/brightness;
 			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
-			end;
+			break;
 		case(3):
+			TIM_OCInitStructure.TIM_Pulse = 0;
+			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+			TIM_OCInitStructure.TIM_Pulse = 0;
+			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
 			TIM_OCInitStructure.TIM_Pulse = 3600/brightness;
 			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
-			end;
+			break;
 		default:
 			TIM_OCInitStructure.TIM_Pulse = 0;
 			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
@@ -71,7 +83,6 @@ void TIM2_IRQHandler()
 			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
 			TIM_OCInitStructure.TIM_Pulse = 0;
 			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
-			end;
 	}
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 }
