@@ -1,8 +1,8 @@
 #include "stm32f10x.h"
-
+//Yardımcı video:
+//https://www.youtube.com/watch?v=RPJgO_zL4ZM
 int led = 1; //Off = 0, Red = 1, Yellow = 2, Green = 3
-int brightness = 0; //Low = 0, Medium = 1, High = 2, Full = 3
-
+int brightness = 0; //Low = 4, Medium = 3, High = 2, Full = 1, PWM'i 3600/brightness olarak yazdım
 GPIO_InitTypeDef GPIO_InitStructure;
 EXTI_InitTypeDef EXTI_InitStructure;
 
@@ -16,7 +16,7 @@ TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; // TIM2_CCMR1
 TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; // TIM2_CCER
 TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; // TIM2_CCER
 TIM_OCInitStructure.TIM_Pulse = 3600; // TIM2_CCR1
-TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+TIM_OC1Init(TIM2, &TIM_OCInitStructure);
 
 EXTI_InitStructure.EXTI_Line = EXTI_Line0;
 EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
@@ -34,23 +34,45 @@ void EXTI4_IRQHandler(void) //Switch Led
 
 void EXTI6_IRQHandler(void)
 {
-	brightness++;
-	if(brightness = 4)
-	brightness = 3;
+	brightness--;
+	if(brightness = -1)
+	brightness = 0;
 	EXTI_ClearITPendingBit(EXTI_Line5);
 }
 
 void EXTI5_IRQHandler(void)
 {
-	brightness--;
-	if(brightness = -1)
-	brightness = 0;
+	brightness++;
+	if(brightness = 5)
+	brightness = 4;
 	EXTI_ClearITPendingBit(EXTI_Line6);
 }
 
 void TIM2_IRQHandler() 
 {
-	
+	switch(led)
+	{
+		case(1):
+			TIM_OCInitStructure.TIM_Pulse = 3600/brightness;
+			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+			end;
+		case(2):
+			TIM_OCInitStructure.TIM_Pulse = 3600/brightness;
+			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+			end;
+		case(3):
+			TIM_OCInitStructure.TIM_Pulse = 3600/brightness;
+			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+			end;
+		default:
+			TIM_OCInitStructure.TIM_Pulse = 0;
+			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+			TIM_OCInitStructure.TIM_Pulse = 0;
+			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+			TIM_OCInitStructure.TIM_Pulse = 0;
+			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+			end;
+	}
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 }
 
