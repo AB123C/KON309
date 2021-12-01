@@ -1,0 +1,278 @@
+#include "stm32f10x.h"
+#include "config.h"
+#include "delay.h"
+
+TIM_OCInitTypeDef TIM_OCInitStructure;
+TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+
+//int HIGH = 35999;
+//int MED = 18000;
+//int LOW = 3600;
+
+int HIGH = 0x8C9F;
+int MED = 0x4650;
+int LOW = 0xE10;
+
+int OFF = 0;
+enum STATES {OFFLEDS, red_low, red_med, red_high, yellow_low, yellow_med, yellow_high, green_low, green_med, green_high};
+enum STATES state;
+extern int button_choose, button_bright;
+
+void CONFIG_TIM2(void)
+{
+	// Configure time base generation
+  TIM_TimeBaseStructure.TIM_Period = 35999;
+  TIM_TimeBaseStructure.TIM_Prescaler = 19; //timer is set for 100Hz
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+  TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+	
+	TIM_OCInitStructure.TIM_OCMode=TIM_OCMode_PWM1;
+	TIM_OCInitStructure.TIM_OCPolarity=TIM_OCPolarity_High;
+	TIM_OCInitStructure.TIM_OutputState=TIM_OutputState_Enable;
+	
+  TIM_OCInitStructure.TIM_Pulse=OFF;
+	TIM_OC2Init(TIM2,&TIM_OCInitStructure);
+	 
+	TIM_OCInitStructure.TIM_Pulse=0;
+	TIM_OC1Init(TIM2,&TIM_OCInitStructure);
+	
+	TIM_OCInitStructure.TIM_Pulse=0;
+	TIM_OC4Init(TIM2,&TIM_OCInitStructure);
+	
+	// Enable interrupts
+	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+
+	// Enable timer 2
+  TIM_Cmd(TIM2, ENABLE);
+}
+int main(void)
+{ 
+	// Enable clocks for PortA, PortB (for buttons and LEDs) and AFIO (for exti)
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	
+	//configuration functions are defined in config.c
+	CONFIG_GPIO();
+  CONFIG_EXTI();
+  CONFIG_NVIC();
+	CONFIG_TIM2();
+	
+	delayInit();
+	while(1)
+	{
+		switch(state)
+		{
+			case red_low:
+				TIM2->CCR2 = LOW; //red
+				TIM2->CCR1 = OFF; //yellow 
+				TIM2->CCR4 = OFF; //green
+				if(button_choose ==1)
+				{
+					delayMs(200);
+					state=yellow_low;
+					button_choose=0;
+					button_bright=0;
+				}
+				else if(button_bright==1)
+				{
+					delayMs(200);
+					state=red_med;
+					button_choose=0;
+					button_bright=0;
+				}
+				break;
+			case red_med:			
+				TIM2->CCR2 = MED;
+				TIM2->CCR1 = OFF;
+				TIM2->CCR4 = OFF;
+				if(button_choose ==1)
+				{
+					delayMs(200);
+					state=yellow_low;
+					button_choose=0;
+					button_bright=0;
+				}
+				else if(button_bright==1)
+				{
+					delayMs(200);
+					state=red_high;
+					button_choose=0;
+					button_bright=0;
+				}
+				break;
+			case red_high:
+				TIM2->CCR2 = HIGH;
+				TIM2->CCR1 = OFF;
+				TIM2->CCR4 = OFF;
+				if(button_choose ==1)
+				{
+					delayMs(200);
+					state=yellow_low;
+					button_choose=0;
+					button_bright=0;
+				}
+				else if(button_bright==1)
+				{
+					delayMs(200);
+					state=red_low;
+					button_choose=0;
+					button_bright=0;
+				}
+				break;
+			case yellow_low:
+				TIM2->CCR2 = OFF;
+				TIM2->CCR1 = LOW;
+				TIM2->CCR4 = OFF;
+				if(button_choose ==1)
+				{
+					delayMs(200);
+					state=green_low;
+					button_choose=0;
+					button_bright=0;
+				}
+				else if(button_bright==1)
+				{
+					delayMs(200);
+					state=yellow_med;
+					button_choose=0;
+					button_bright=0;
+				}
+				break;
+			case yellow_med:
+				TIM2->CCR2 = OFF;
+				TIM2->CCR1 = MED;
+				TIM2->CCR4 = OFF;
+				if(button_choose ==1)
+				{
+					delayMs(200);
+					state=green_low;
+					button_choose=0;
+					button_bright=0;
+				}
+				else if(button_bright==1)
+				{
+					delayMs(200);
+					state=yellow_high;
+					button_choose=0;
+					button_bright=0;
+				}
+				break;
+			case yellow_high:
+				TIM2->CCR2 = OFF;
+				TIM2->CCR1 = HIGH;
+				TIM2->CCR4 = OFF;
+				if(button_choose ==1)
+				{
+					delayMs(200);
+					state=green_low;
+					button_choose=0;
+					button_bright=0;
+				}
+				else if(button_bright==1)
+				{
+					delayMs(200);
+					state=yellow_low;
+					button_choose=0;
+					button_bright=0;
+				}
+				break;
+			case green_low:
+				TIM_OCInitStructure.TIM_Pulse=OFF;
+				TIM_OC2Init(TIM2,&TIM_OCInitStructure);
+	 
+				TIM_OCInitStructure.TIM_Pulse=OFF;
+				TIM_OC1Init(TIM2,&TIM_OCInitStructure);
+
+				TIM_OCInitStructure.TIM_Pulse=LOW;
+				TIM_OC4Init(TIM2,&TIM_OCInitStructure);
+				if(button_choose ==1)
+				{
+					delayMs(200);
+					state = OFFLEDS;
+					button_choose=0;
+					button_bright=0;
+				}
+				else if(button_bright==1)
+				{
+					delayMs(200);
+					state=green_med;
+					button_choose=0;
+					button_bright=0;
+				}
+				break;
+			case green_med:
+				TIM_OCInitStructure.TIM_Pulse=OFF;
+				TIM_OC2Init(TIM2,&TIM_OCInitStructure);
+	 
+				TIM_OCInitStructure.TIM_Pulse=OFF;
+				TIM_OC1Init(TIM2,&TIM_OCInitStructure);
+
+				TIM_OCInitStructure.TIM_Pulse=MED;
+				TIM_OC4Init(TIM2,&TIM_OCInitStructure);
+				if(button_choose ==1)
+				{
+					delayMs(200);
+					state=OFFLEDS;
+					button_choose=0;
+					button_bright=0;
+				}
+				else if(button_bright==1)
+				{
+					delayMs(200);
+					state=green_high;
+					button_choose=0;
+					button_bright=0;
+				}
+				break;
+			case green_high:
+				TIM_OCInitStructure.TIM_Pulse=OFF;
+				TIM_OC2Init(TIM2,&TIM_OCInitStructure);
+	 
+				TIM_OCInitStructure.TIM_Pulse=OFF;
+				TIM_OC1Init(TIM2,&TIM_OCInitStructure);
+
+				TIM_OCInitStructure.TIM_Pulse=HIGH;
+				TIM_OC4Init(TIM2,&TIM_OCInitStructure);
+				if(button_choose ==1)
+				{
+					delayMs(200);
+					state=OFFLEDS;
+					button_choose=0;
+					button_bright=0;
+				}
+				else if(button_bright==1)
+				{
+					delayMs(200);
+					state=green_low;
+					button_choose=0;
+					button_bright=0;
+				}
+				break;
+			case OFFLEDS:
+				TIM_OCInitStructure.TIM_Pulse=OFF;
+				TIM_OC2Init(TIM2,&TIM_OCInitStructure);
+	 
+				TIM_OCInitStructure.TIM_Pulse=OFF;
+				TIM_OC1Init(TIM2,&TIM_OCInitStructure);
+
+				TIM_OCInitStructure.TIM_Pulse=OFF;
+				TIM_OC4Init(TIM2,&TIM_OCInitStructure);
+				if(button_choose ==1)
+				{
+					delayMs(200);
+					state=red_low;
+					button_choose=0;
+					button_bright=0;
+				}
+				else if(button_bright==1)
+				{
+					delayMs(200);
+					state=OFFLEDS;
+					button_choose=0;
+					button_bright=0;
+				}
+				break;
+	}	
+	}
+}
