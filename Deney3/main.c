@@ -1,10 +1,14 @@
-#include "stm32f10x.h"
-//Yardımcı video:
+#include "stm32f10x.h"  
+//Yardimci video:
 //https://www.youtube.com/watch?v=RPJgO_zL4ZM
 int led = 1; //Off = 0, Red = 1, Yellow = 2, Green = 3
-int brightness = 0; //Low = 4, Medium = 3, High = 2, Full = 1, PWM'i 3600/brightness olarak yazdım
+int brightness = 0; //Low = 4, Medium = 3, High = 2, Full = 1, PWM'i 3600/brightness olarak yazdim
 GPIO_InitTypeDef GPIO_InitStructure;
 EXTI_InitTypeDef EXTI_InitStructure;
+AFIO_TypeDef AFIO_InitStructure;
+TIM_OCInitTypeDef TIM_OCInitStructure;
+TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+
 
 TIM_TimeBaseStructure.TIM_Period = 49999;
 TIM_TimeBaseStructure.TIM_Prescaler = 143;
@@ -21,7 +25,7 @@ TIM_OC1Init(TIM2, &TIM_OCInitStructure);
 EXTI_InitStructure.EXTI_Line = EXTI_Line0;
 EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
-EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+EXTI_InitStructure.EXTI_LineCmd = ENABLE;              // Device header
 EXTI_Init(&EXTI_InitStructure);
 
 void EXTI4_IRQHandler(void) //Switch Led
@@ -35,7 +39,7 @@ void EXTI4_IRQHandler(void) //Switch Led
 void EXTI6_IRQHandler(void)
 {
 	brightness--;
-	if(brightness = -1)
+	if(brightness == -1)
 	brightness = 0;
 	EXTI_ClearITPendingBit(EXTI_Line5);
 }
@@ -43,7 +47,7 @@ void EXTI6_IRQHandler(void)
 void EXTI5_IRQHandler(void)
 {
 	brightness++;
-	if(brightness = 5)
+	if(brightness == 5)
 	brightness = 4;
 	EXTI_ClearITPendingBit(EXTI_Line6);
 }
