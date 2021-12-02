@@ -41,49 +41,11 @@ void EXTI3_IRQHandler(void)
 }
 
 
-void TIM2_IRQHandler() 
-{
-	switch(led)
-	{
-		case(1):
-			TIM_OCInitStructure.TIM_Pulse = 9000*brightness;
-			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
-			TIM_OCInitStructure.TIM_Pulse = 0;
-			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
-			TIM_OCInitStructure.TIM_Pulse = 0;
-			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
-			break;
-		case(2):
-			TIM_OCInitStructure.TIM_Pulse = 0;
-			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
-			TIM_OCInitStructure.TIM_Pulse = 9000*brightness;
-			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
-			TIM_OCInitStructure.TIM_Pulse = 0;
-			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
-			break;
-		case(3):
-			TIM_OCInitStructure.TIM_Pulse = 0;
-			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
-			TIM_OCInitStructure.TIM_Pulse = 0;
-			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
-			TIM_OCInitStructure.TIM_Pulse = 9000*brightness;
-			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
-			break;
-		default:
-			TIM_OCInitStructure.TIM_Pulse = 0;
-			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
-			TIM_OCInitStructure.TIM_Pulse = 0;
-			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
-			TIM_OCInitStructure.TIM_Pulse = 0;
-			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
-	}
-	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-}
 
 int main(void)
 {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	
 	TIM_TimeBaseStructure.TIM_Period = 35999;
 	TIM_TimeBaseStructure.TIM_Prescaler = 19;
@@ -97,11 +59,15 @@ int main(void)
 	TIM_OCInitStructure.TIM_Pulse = 9000; 
 	TIM_OC1Init(TIM2, &TIM_OCInitStructure);
 	
-    	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
+  TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; 
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; 
 	TIM_OCInitStructure.TIM_Pulse = 9000; 
 	TIM_OC2Init(TIM2, &TIM_OCInitStructure);
 	
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; 
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; 
 	TIM_OCInitStructure.TIM_Pulse = 9000; 
 	TIM_OC3Init(TIM2, &TIM_OCInitStructure);
 
@@ -177,6 +143,39 @@ int main(void)
 
     while(1)
 	{
-		
+		switch(led)
+		{
+			case(1):
+				TIM_OCInitStructure.TIM_Pulse = 9000*brightness;
+				TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+				TIM_OCInitStructure.TIM_Pulse = 0;
+				TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+				TIM_OCInitStructure.TIM_Pulse = 0;
+				TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+				break;
+			case(2):
+				TIM_OCInitStructure.TIM_Pulse = 0;
+				TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+				TIM_OCInitStructure.TIM_Pulse = 9000*brightness;
+				TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+				TIM_OCInitStructure.TIM_Pulse = 0;
+				TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+				break;
+			case(3):
+				TIM_OCInitStructure.TIM_Pulse = 0;
+				TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+				TIM_OCInitStructure.TIM_Pulse = 0;
+				TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+				TIM_OCInitStructure.TIM_Pulse = 9000*brightness;
+				TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+				break;
+			default:
+				TIM_OCInitStructure.TIM_Pulse = 0;
+				TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+				TIM_OCInitStructure.TIM_Pulse = 0;
+				TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+				TIM_OCInitStructure.TIM_Pulse = 0;
+				TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+		}
 	} 			
 }
