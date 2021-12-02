@@ -92,7 +92,17 @@ int main(void)
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; 
 	TIM_OCInitStructure.TIM_Pulse = 9000; 
 	TIM_OC1Init(TIM2, &TIM_OCInitStructure);
-
+	
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
+	TIM_OCInitStructure.TIM_Pulse = 9000; 
+	TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+	
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
+	TIM_OCInitStructure.TIM_Pulse = 9000; 
+	TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+	
+	
+	
 	EXTI_InitStructure.EXTI_Line = EXTI_Line1;
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
