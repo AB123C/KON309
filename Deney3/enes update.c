@@ -15,26 +15,29 @@ NVIC_InitTypeDef NVIC_InitStructure;
 
 void EXTI1_IRQHandler(void) //Switch Led
 {
-	led++;
-	if(led == 4)
-	led  = 0;
-	EXTI_ClearITPendingBit(EXTI_Line1);
+    if(EXTI_GetITStatus(EXTI_Line1) != RESET)
+        led++;
+        if(led == 4)
+        led  = 0;
+        EXTI_ClearITPendingBit(EXTI_Line1);
 }
 
 void EXTI2_IRQHandler(void)
 {
-	brightness++;
-	if(brightness == 5)
-	brightness = 4;
-	EXTI_ClearITPendingBit(EXTI_Line2);
+    if(EXTI_GetITStatus(EXTI_Line2) != RESET)
+        brightness++;
+        if(brightness == 5)
+        brightness = 4;
+        EXTI_ClearITPendingBit(EXTI_Line2);
 	
 }
 void EXTI3_IRQHandler(void)
 {
-	brightness--;
-	if(brightness == -1)
-	brightness = 0;
-	EXTI_ClearITPendingBit(EXTI_Line3);
+    if(EXTI_GetITStatus(EXTI_Line3) != RESET)
+        brightness--;
+        if(brightness == -1)
+        brightness = 0;
+        EXTI_ClearITPendingBit(EXTI_Line3);
 }
 
 
@@ -80,6 +83,7 @@ void TIM2_IRQHandler()
 int main(void)
 {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	
 	TIM_TimeBaseStructure.TIM_Period = 35999;
 	TIM_TimeBaseStructure.TIM_Prescaler = 19;
@@ -92,17 +96,14 @@ int main(void)
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; 
 	TIM_OCInitStructure.TIM_Pulse = 9000; 
 	TIM_OC1Init(TIM2, &TIM_OCInitStructure);
-	
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
 	TIM_OCInitStructure.TIM_Pulse = 9000; 
 	TIM_OC2Init(TIM2, &TIM_OCInitStructure);
 	
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
 	TIM_OCInitStructure.TIM_Pulse = 9000; 
 	TIM_OC3Init(TIM2, &TIM_OCInitStructure);
-	
-	
-	
+
 	EXTI_InitStructure.EXTI_Line = EXTI_Line1;
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
