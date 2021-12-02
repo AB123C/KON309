@@ -1,7 +1,7 @@
 #include "stm32f10x.h"  
 
 int led = 0; //Off = 0, Red = 1, Yellow = 2, Green = 3
-int brightness = 4; //Low = 1, Medium = 2, High = 3, Full = 4, 
+int brightness = 1; //Low = 1, Medium = 2, High = 3, Full = 4, 
 
 GPIO_InitTypeDef GPIO_InitStructure;
 EXTI_InitTypeDef EXTI_InitStructure;
@@ -91,7 +91,7 @@ int main(void)
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; 
 	TIM_OCInitStructure.TIM_Pulse = 9000; 
-	TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+	TIM_OC8Init(TIM2, &TIM_OCInitStructure);
 
 	EXTI_InitStructure.EXTI_Line = EXTI_Line1;
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
