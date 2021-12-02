@@ -45,7 +45,7 @@ void EXTI3_IRQHandler(void)
 int main(void)
 {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+  	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	
 	TIM_TimeBaseStructure.TIM_Period = 35999;
 	TIM_TimeBaseStructure.TIM_Prescaler = 19;
@@ -110,6 +110,8 @@ int main(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
+	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+	
 	//Red
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
