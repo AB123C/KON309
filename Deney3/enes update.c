@@ -138,7 +138,9 @@ int main(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
-
+	EXTI1_IRQHandler();
+	EXTI2_IRQHandler();
+	EXTI3_IRQHandler();
 	TIM_Cmd(TIM2, ENABLE);
 
     while(1)
