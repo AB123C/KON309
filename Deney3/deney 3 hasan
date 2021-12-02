@@ -1,7 +1,7 @@
 #include "stm32f10x.h"  
 
 int led = 0; //Off = 0, Red = 1, Yellow = 2, Green = 3
-int brightness = 4; //Low = 4, Medium = 3, High = 2, Full = 1, 
+int brightness = 4; //Low = 1, Medium = 2, High = 3, Full = 4, 
 
 GPIO_InitTypeDef GPIO_InitStructure;
 EXTI_InitTypeDef EXTI_InitStructure;
@@ -23,17 +23,17 @@ void EXTI1_IRQHandler(void) //Switch Led
 
 void EXTI2_IRQHandler(void)
 {
-	brightness--;
-	if(brightness == 0)
-	brightness = 1;
+	brightness++;
+	if(brightness == 5)
+	brightness = 4;
 	EXTI_ClearITPendingBit(EXTI_Line2);
 	
 }
 void EXTI3_IRQHandler(void)
 {
-	brightness++;
-	if(brightness == 5)
-	brightness = 4;
+	brightness--;
+	if(brightness == -1)
+	brightness = 0;
 	EXTI_ClearITPendingBit(EXTI_Line3);
 }
 
@@ -43,7 +43,7 @@ void TIM2_IRQHandler()
 	switch(led)
 	{
 		case(1):
-			TIM_OCInitStructure.TIM_Pulse = 36000/brightness;
+			TIM_OCInitStructure.TIM_Pulse = 9000*brightness;
 			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
 			TIM_OCInitStructure.TIM_Pulse = 0;
 			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
@@ -53,7 +53,7 @@ void TIM2_IRQHandler()
 		case(2):
 			TIM_OCInitStructure.TIM_Pulse = 0;
 			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
-			TIM_OCInitStructure.TIM_Pulse = 36000/brightness;
+			TIM_OCInitStructure.TIM_Pulse = 9000*brightness;
 			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
 			TIM_OCInitStructure.TIM_Pulse = 0;
 			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
@@ -63,7 +63,7 @@ void TIM2_IRQHandler()
 			TIM_OC1Init(TIM2, &TIM_OCInitStructure);
 			TIM_OCInitStructure.TIM_Pulse = 0;
 			TIM_OC2Init(TIM2, &TIM_OCInitStructure);
-			TIM_OCInitStructure.TIM_Pulse = 36000/brightness;
+			TIM_OCInitStructure.TIM_Pulse = 9000*brightness;
 			TIM_OC3Init(TIM2, &TIM_OCInitStructure);
 			break;
 		default:
@@ -130,17 +130,17 @@ int main(void)
 	NVIC_Init(&NVIC_InitStructure);
 
 	//Red
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1; 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	//Yellow
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2; 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	//Green
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3; 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
