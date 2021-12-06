@@ -16,28 +16,35 @@ NVIC_InitTypeDef NVIC_InitStructure;
 void EXTI0_IRQHandler(void) //Switch Led
 {
     if(EXTI_GetITStatus(EXTI_Line0) != RESET)
-        led++;
-        if(led == 4)
-        led  = 0;
-        EXTI_ClearITPendingBit(EXTI_Line0);
+	{
+		led++;
+		if(led == 4)
+		led  = 0;
+		EXTI_ClearITPendingBit(EXTI_Line0);
+	}
 }
 
 void EXTI3_IRQHandler(void)
 {
     if(EXTI_GetITStatus(EXTI_Line3) != RESET)
-        brightness++;
-        if(brightness == 5)
-        brightness = 4;
-        EXTI_ClearITPendingBit(EXTI_Line3);
+	{
+		brightness++;
+		if(brightness == 5)
+		brightness = 4;
+		EXTI_ClearITPendingBit(EXTI_Line3);
+	}
 	
 }
+
 void EXTI4_IRQHandler(void)
 {
     if(EXTI_GetITStatus(EXTI_Line4) != RESET)
-        brightness--;
-        if(brightness == -1)
-        brightness = 0;
-        EXTI_ClearITPendingBit(EXTI_Line4);
+	{
+		brightness--;
+		if(brightness == -1)
+		brightness = 0;
+		EXTI_ClearITPendingBit(EXTI_Line4);
+	}
 }
 
 
@@ -141,9 +148,9 @@ int main(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	
-	EXTI1_IRQHandler();
-	EXTI2_IRQHandler();
+	EXTI0_IRQHandler();
 	EXTI3_IRQHandler();
+	EXTI4_IRQHandler();
 	TIM_Cmd(TIM2, ENABLE);
 
     while(1)
