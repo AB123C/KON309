@@ -1,0 +1,463 @@
+#include "stm32f10x.h"
+#include "math.h"
+#include <stdio.h>
+#define pi 3.14159
+
+ GPIO_InitTypeDef GPIO_InitStructure; // for gpio
+ EXTI_InitTypeDef EXTI_InitStructure; // for interrupt
+ NVIC_InitTypeDef NVIC_InitStructure; // for interrupt
+ ADC_InitTypeDef ADC_InitStructure; // for potentiometer
+ TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;// for timer
+ TIM_OCInitTypeDef TIM_OCInitStructure; // for timer
+
+ static double t=0;
+ static int button1Pressed=0;//to use logic operations in external interrupt
+ static int dutyCycleCounter=0; // used to determine
+ static char currentLed='G'; // G is green led, Y is yellow led and R is red led. Switch case could also used instead of chars
+ static int button2Pressed=0; // to use logic operations in external interrupt
+ static double speedlimit=100; // determined by potentiometer
+ static int data=0;
+ char dataArray[20];
+ int Sent_data=0;
+ 
+ void UART_Transmit(char *string)
+  {
+ while(*string)
+ {
+ while(USART_GetFlagStatus(USART1,USART_FLAG_TC) == RESET);
+ USART_SendData(USART1,*string++);
+ }
+ }
+
+
+
+ void delay(uint32_t time)
+ {
+
+ time=time*2318;
+ while(time)
+ time--;
+ }
+ void configureTIM4(void){ // Graph timer
+	
+	//timer counts for every 0.5s
+	TIM_TimeBaseStructure.TIM_Period = 24999;
+	TIM_TimeBaseStructure.TIM_Prescaler = 1439;
+	TIM_TimeBaseStructure.TIM_ClockDivision=0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIM4,&TIM_TimeBaseStructure);
+	
+	TIM_ITConfig(TIM4, TIM_IT_Update , ENABLE);
+
+	NVIC_InitStructure.NVIC_IRQChannel=TIM4_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0x03;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority=0X00;
+	
+	NVIC_Init(&NVIC_InitStructure);
+	TIM_Cmd(TIM4, ENABLE);
+}
+ void TIM4_IRQHandler(){
+	if(TIM_GetITStatus(TIM4,TIM_IT_Update)==SET)
+	{
+		//when timer ticks			
+			sprintf(dataArray,"%d\r",dutyCycleCounter/3);
+			UART_Transmit(dataArray); //send our data to matlab or terminal
+
+		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+	}
+}
+ void TIM3_IRQHandler(void)
+ {
+	 
+ t=t+0.0020;
+ TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+ 
+ }
+
+
+
+ void EXTI0_IRQHandler(void) //this part executes when interrupt is detected
+ {
+ if(EXTI_GetITStatus(EXTI_Line0) != RESET)
+ {
+ button2Pressed=1;
+
+ while(1)
+ {
+ if(button2Pressed)
+ {
+ if(dutyCycleCounter>0) // so that speed dont go negative
+
+ {
+ dutyCycleCounter=dutyCycleCounter-10; // lower speed
+
+
+ if(currentLed=='R')
+ {
+
+ if(dutyCycleCounter<211) //211 was taken instead of 200 to prevent errors caused by rounded speed (for example loop still going on Red after speed at 59)
+ {
+ TIM_OCInitStructure.TIM_Pulse = 1;
+ TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+ currentLed='Y';
+ }
+ else
+ {
+ TIM_OCInitStructure.TIM_Pulse = (dutyCycleCounter-200)*75;
+ TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+ }
+
+ }
+ if(currentLed=='Y')
+ {
+ if(dutyCycleCounter<111) // similiar to previous case, +11 on 100 allows us to prevent negative pulse value
+ {
+ TIM_OCInitStructure.TIM_Pulse = 1;
+ TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+ currentLed='G';
+ }
+ else
+ {
+ TIM_OCInitStructure.TIM_Pulse = (dutyCycleCounter-100)*75;
+ TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+ }
+
+ }
+ if(currentLed=='G') //
+ {
+ if(dutyCycleCounter<11) //similiar to previous case, this logic to prevent negative pulse value
+ {
+ TIM_OCInitStructure.TIM_Pulse = 1;
+ TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+ currentLed='G';
+ }
+ else
+ {
+ TIM_OCInitStructure.TIM_Pulse =dutyCycleCounter*75;
+ TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+ }
+
+ }
+ delay(250);
+
+ }
+ button2Pressed=GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0);
+ }
+ else
+ {
+ break;
+ }
+
+ }
+
+
+
+ EXTI_ClearITPendingBit(EXTI_Line0); //used to clear interrupt data so that it wont detect wrong interrupts
+ }
+ }
+ void EXTI3_IRQHandler(void) //this part executes when interrupt is detected
+ {
+ if(EXTI_GetITStatus(EXTI_Line3) != RESET)
+ {
+ button1Pressed=1;
+ while(1)
+{
+ if(button1Pressed)
+ {
+ if(dutyCycleCounter<(speedlimit*2.9)) // speed limit is determined by potentiometer
+
+ {
+ dutyCycleCounter=dutyCycleCounter+10;
+
+
+ if(currentLed=='G')
+ {
+ TIM_OCInitStructure.TIM_Pulse = dutyCycleCounter*75;
+ TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+ if(dutyCycleCounter>=100 && dutyCycleCounter<=200 )
+ {
+ currentLed='Y';
+ }
+ }
+ if(currentLed=='Y')
+ {
+ TIM_OCInitStructure.TIM_Pulse = (dutyCycleCounter-100)*75;
+ TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+ if(dutyCycleCounter>200)
+ {
+ currentLed='R';
+ }
+ }
+ if(currentLed=='R')
+ {
+
+ TIM_OCInitStructure.TIM_Pulse =(dutyCycleCounter-200)*75;
+ TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+ }
+ delay(250);
+
+ }
+ button1Pressed=GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_3);
+ }
+ else
+ {
+ break;
+ }
+
+ }
+
+ EXTI_ClearITPendingBit(EXTI_Line3); //used to clear interrupt data so that it wont detect wrong interrupts
+ }
+ }
+
+
+
+ void time_Config(void)
+ {
+ RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+ //7.200.000/72000 results in 100MHz, having period of 0.01 secs. Thus, increment of counter 100 times will give us 1 second and increment of counter 1000 times will yield 10 seconds.
+TIM_TimeBaseStructure.TIM_Period = 8999;
+ TIM_TimeBaseStructure.TIM_Prescaler = 7;
+ TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+ TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+ TIM_TimeBaseInit(TIM2,&TIM_TimeBaseStructure);
+
+
+ TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+ TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+ TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+ TIM_OCInitStructure.TIM_Pulse = 3600;
+ TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+ TIM_Cmd(TIM2, ENABLE);
+
+
+ }
+
+ void EXTI_Config(void) // this part is done for interrupt in A0 pin. We will call this function from main method
+ {
+ // EXTI_DeInit();
+ GPIO_EXTILineConfig(GPIO_PortSourceGPIOA,GPIO_PinSource3);
+ RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+ EXTI_InitStructure.EXTI_Line = EXTI_Line3;
+ EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+ EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+ EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+ EXTI_Init(&EXTI_InitStructure);
+
+ NVIC_InitStructure.NVIC_IRQChannel = EXTI3_IRQn;
+ NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+ NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+ NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+ NVIC_Init(&NVIC_InitStructure);
+ }
+
+ void EXTI_Config_2(void) // this part is done for interrupt in A0 pin. We will call this function from main method
+ {
+ GPIO_EXTILineConfig(GPIO_PortSourceGPIOB,GPIO_PinSource0);
+ RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+ EXTI_InitStructure.EXTI_Line = EXTI_Line0;
+ EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+ EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+ EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+ EXTI_Init(&EXTI_InitStructure);
+
+ NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
+ NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+ NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+ NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+ NVIC_Init(&NVIC_InitStructure);
+ }
+
+ void timeInterrupt_Config(void)
+ {
+ RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+ //results in 100MHz, having period of 0.01 secs. Thus, increment of counter 100 times will give us 1 second and increment of counter 1000 times will yield 10 seconds.
+ TIM_TimeBaseStructure.TIM_Period = 8999;
+ TIM_TimeBaseStructure.TIM_Prescaler = 7;
+ TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV4;
+ TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+ TIM_TimeBaseStructure.TIM_RepetitionCounter=1;
+ TIM_TimeBaseInit(TIM3,&TIM_TimeBaseStructure);
+
+ TIM_ITConfig(TIM3,TIM_IT_Update,ENABLE);
+ TIM_Cmd(TIM3, ENABLE);
+ NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+ NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+ NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+ NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+ NVIC_Init(&NVIC_InitStructure);
+ }
+ void adc_Config(void)
+ {
+
+ RCC_ADCCLKConfig(RCC_PCLK2_Div6);
+ RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 , ENABLE);
+
+ ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
+ ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+ ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+
+ ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+ ADC_InitStructure.ADC_NbrOfChannel = 1;
+ ADC_Init(ADC1, &ADC_InitStructure);
+ ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_7Cycles5);
+
+ ADC_Cmd(ADC1, ENABLE);
+ ADC_ResetCalibration(ADC1);
+
+ while(ADC_GetResetCalibrationStatus(ADC1));
+ ADC_StartCalibration(ADC1);
+
+ while(ADC_GetCalibrationStatus(ADC1));
+ ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+ }
+
+ void gpio_Config(void)
+ {
+ //initialise pins
+ // B is enabled as gpio for button input detection
+ RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+ RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+
+ // potentiometer
+ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+ GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+ GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+ //LED 1
+ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+ GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+ GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+ GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+ //LED 2
+ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+ GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+ GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+ GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+ //LED 4
+ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+ GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+ GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+ GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+ // Configue UART RX - UART module's TX should be connected to this pin
+ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+ GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+ GPIO_Init(GPIOA, &GPIO_InitStructure);
+ // Configue UART TX - UART module's RX should be connected to this pin
+ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+ GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+ GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+ GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+
+ }
+ void CONFIG_UART1(void)
+ {
+ USART_InitTypeDef USART_InitStructure;
+ // USART_ClockInitTypeDef USART_ClockInitStructure;
+ RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+
+ USART_InitStructure.USART_BaudRate = 19200; // must also be taken as 19200 in terminal or matlab
+ USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+ USART_InitStructure.USART_StopBits = USART_StopBits_1;
+ USART_InitStructure.USART_Parity = USART_Parity_No;
+ USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+ USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+ USART_Init(USART1, &USART_InitStructure);
+
+ // USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+
+ USART_Cmd(USART1, ENABLE);
+ }
+
+
+
+
+ //Entry point to our code
+ int main(void)
+ {
+ double frequency=0;
+ double PotentiometerReading=0;
+
+ gpio_Config();
+ time_Config();
+ adc_Config();
+ timeInterrupt_Config();
+ EXTI_Config();
+ EXTI_Config_2();
+ CONFIG_UART1();
+ configureTIM4();
+
+ TIM_OCInitStructure.TIM_Pulse = 1;
+ TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+
+
+ TIM_OCInitStructure.TIM_Pulse = 1;
+ TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+
+ TIM_OCInitStructure.TIM_Pulse = 1;
+ TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+
+
+
+ while(1) // loop that is always true so our program below will repeat itself
+ {
+
+
+
+ frequency=speedlimit;
+
+ PotentiometerReading=ADC_GetConversionValue(ADC1);// read from adc
+
+ if(frequency-PotentiometerReading >=0.1|| PotentiometerReading- frequency >= 0.1)
+ {
+ speedlimit=((PotentiometerReading/4096)*100);
+ if(dutyCycleCounter-10>(speedlimit*3)) // this part lowers our current to max speed if current speed exceeds our limit
+ {
+ dutyCycleCounter=speedlimit*3; // if our speed exceeds maxiumum speed, it is equalized to our new speed
+
+ dutyCycleCounter=dutyCycleCounter-10;
+
+ if(dutyCycleCounter<=100) // if speed is lower than 33, close all others leds and light green according to new speed
+ {
+ currentLed='G';
+ TIM_OCInitStructure.TIM_Pulse = dutyCycleCounter*75;
+ TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+
+
+ TIM_OCInitStructure.TIM_Pulse = 1;
+ TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+ TIM_OCInitStructure.TIM_Pulse = 1;
+ TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+ }
+ else if(dutyCycleCounter>100 && dutyCycleCounter<=200)// if speed is between 33 and 66, close red led, tune yellow led according to our speed, max green led
+ {
+ currentLed='Y';
+ TIM_OCInitStructure.TIM_Pulse = (dutyCycleCounter-100)*75;
+ TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+
+ TIM_OCInitStructure.TIM_Pulse = 100*75; // %100 duty cycle for previous leds
+ TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+ TIM_OCInitStructure.TIM_Pulse = 1;
+ TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+ }
+ else if(dutyCycleCounter>200)//only tune red according to current speed
+ {
+ currentLed='R';
+ TIM_OCInitStructure.TIM_Pulse = (dutyCycleCounter-200)*75;
+ TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+
+ TIM_OCInitStructure.TIM_Pulse = 100*75; // %100 duty cycle for previous leds
+ TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+ TIM_OCInitStructure.TIM_Pulse = 100*75; // %100 duty cycle for previous leds
+ TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+ }
+ }
+
+ }
+ }
+ }
