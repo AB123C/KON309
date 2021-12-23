@@ -234,7 +234,7 @@ TIM_TimeBaseStructure.TIM_Period = 8999;
 
  }
 
- void EXTI_Config(void) // this part is done for interrupt in A0 pin. We will call this function from main method
+ void EXTI_Config(void) // this part is done for interrupt in A3 pin. We will call this function from main method
  {
  // EXTI_DeInit();
  GPIO_EXTILineConfig(GPIO_PortSourceGPIOA,GPIO_PinSource3);
