@@ -39,7 +39,7 @@
  time--;
  }
  void configureTIM4(void){ // Graph timer
-	
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 	//timer counts for every 0.5s
 	TIM_TimeBaseStructure.TIM_Period = 24999;
 	TIM_TimeBaseStructure.TIM_Prescaler = 1439;
